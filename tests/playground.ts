@@ -54,6 +54,13 @@ describe("playground", () => {
         {pubkey: counterAddr(1), isSigner: false, isWritable: true},
         {pubkey: counterAddr(2), isSigner: false, isWritable: true},
       ])
+      .postInstructions([1, 2].map(cntr => 
+        anchor.web3.SystemProgram.transfer({
+          fromPubkey: wallet.publicKey,
+          toPubkey: counterAddr(cntr),
+          lamports: rentExemptionCost
+        })
+      ))
       .rpc();
     const balanceAfter = await anchor.getProvider().connection.getBalance(recipientAddr);
     console.log(balanceBefore, balanceAfter, balanceBefore + 2*rentExemptionCost);
@@ -61,6 +68,10 @@ describe("playground", () => {
     // const upgradeAuthorityInfo = await anchor.getProvider().connection.getAccountInfo(upgradeAuthorityAddr);
     // console.log(upgradeAuthorityAddr.toBase58(), JSON.stringify(upgradeAuthorityInfo, null, 2));
     // console.log(wallet.publicKey.toBase58());
+
+    console.log(
+      await Promise.all([1, 2].map(cntr => anchor.getProvider().connection.getAccountInfo(counterAddr(cntr))))
+    );
     
   });
 });
